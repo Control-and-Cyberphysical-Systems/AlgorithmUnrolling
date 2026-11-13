@@ -9,7 +9,7 @@ def train(self,printer:bool=False):
     self.model.train()
     X = self.x_train
     Y = self.y_train
-    update_progress_bar(1,1000000,f"Start of training | {self.save_name(self.model)} | reps:{self.repititions:.2e} | lr:{self.learning_rate:.2e}")
+    update_progress_bar(1,1000000,f'Start of training | {self.save_name(self.model)} | reps:{self.repititions:.2e} | lr:{self.learning_rate:.2e}')
     
     batch_size = self.batch_size
     loss_glob = []
@@ -23,12 +23,12 @@ def train(self,printer:bool=False):
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
                                                         factor=1/(10**(1.0/4.0)),
                                                         threshold=0.001,
-                                                        # threshold_mode="abs",
+                                                        # threshold_mode='abs',
                                                         patience=10,
                                                         eps= 1e-16)
     optimizer.zero_grad()
     j = 0
-    while j< self.repititions and optimizer.param_groups[0]["lr"] > 1.1*tol_eps:
+    while j< self.repititions and optimizer.param_groups[0]['lr'] > 1.1*tol_eps:
         order = list(range(0,X.shape[0]))
         random.shuffle(order)
         max_train_iters = batch_size*(len(order)//batch_size)
@@ -53,16 +53,16 @@ def train(self,printer:bool=False):
             if self.batch_size == self.x_train.shape[0]:
                 scheduler.step(loss_loc.detach())
             # Update current lr
-            current_lr = optimizer.param_groups[0]["lr"]
+            current_lr = optimizer.param_groups[0]['lr']
             print_iter +=1
             if print_iter%to_print == 0 and printer:
-                update_progress_bar(j*max_train_iters+i_ind+1,self.repititions*max_train_iters,f"Training | loss:{np.mean(print_loss): .8e} | lr:{current_lr:.2e} | rel. improvement per step: {(old_print_loss-np.mean(print_loss))/(old_print_loss+1e8): 2.4e}")
+                update_progress_bar(j*max_train_iters+i_ind+1,self.repititions*max_train_iters,f'Training | loss:{np.mean(print_loss): .8e} | lr:{current_lr:.2e} | rel. improvement per step: {(old_print_loss-np.mean(print_loss))/(old_print_loss+1e8): 2.4e}')
                 improvement.append((old_print_loss-np.mean(print_loss))/(old_print_loss+1e8))
                 old_print_loss = np.mean(print_loss).copy()
                 print_loss = []
                 print_iter = 0
         j+=1
-    update_progress_bar(99,100,f"End of training | loss:{old_print_loss: .4e} | lr:{current_lr:.2e}\n")
+    update_progress_bar(99,100,f'End of training | loss:{old_print_loss: .4e} | lr:{current_lr:.2e}\n')
 
     self.save_model(self.model)
     self.train_loss = loss_glob

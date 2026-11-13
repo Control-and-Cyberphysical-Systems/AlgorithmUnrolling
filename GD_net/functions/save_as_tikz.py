@@ -6,29 +6,29 @@ from shapely.geometry import Polygon
 def save_scatter_tikz(
     values: np.ndarray,
     title: str,
-    xlabel: str = r"$x_0$",
-    ylabel: str = r"$x_1$",
-    filename: str = "scatter.txt",
+    xlabel: str = r'$x_0$',
+    ylabel: str = r'$x_1$',
+    filename: str = 'scatter.txt',
     point_size: float = 2.0,
     max_points: int = 3000,
     triangles:set=set()):
-    """
+    '''
     turns data into pgfplots-Scatterplot and saves it as a standalone .tex-file.
 
     values : (N, 4) - Column: [x0, x1, x2, meta]
              Column 0 → x-Achse, Column 1 → y-Achse, Column 3 → Farbe
-    """
+    '''
     x, y, meta = values[0,:], values[1,:], values[2,:]
     # if triangles is NOT given:
     if not triangles:
         triangles = triangle_finder(values=values)
                     
-    data = ""
+    data = ''
     for t in triangles:
-        data += f"\n({x[t[0]]:.2f},{y[t[0]]:.2f})[{meta[t[0]]:.2f}] ({x[t[1]]:.2f},{y[t[1]]:.2f})[{meta[t[1]]:.2f}] ({x[t[2]]:.2f},{y[t[2]]:.2f})[{meta[t[2]]:.2f}]"
-    # data = "\n".join(f"({xi:.4f}, {yi:.4f},{mi:.6f})" for xi, yi, mi in zip(df["x0"], df["x1"], df["z"]))
+        data += f'\n({x[t[0]]:.2f},{y[t[0]]:.2f})[{meta[t[0]]:.2f}] ({x[t[1]]:.2f},{y[t[1]]:.2f})[{meta[t[1]]:.2f}] ({x[t[2]]:.2f},{y[t[2]]:.2f})[{meta[t[2]]:.2f}]'
+    # data = '\n'.join(f'({xi:.4f}, {yi:.4f},{mi:.6f})' for xi, yi, mi in zip(df['x0'], df['x1'], df['z']))
 
-    tex = f"""
+    tex = f'''
 \\begin{{tikzpicture}}
 \\begin{{axis}}[
     width = 0.2*\\textwidth,
@@ -61,74 +61,74 @@ def save_scatter_tikz(
 }};
 \\end{{axis}}
 \\end{{tikzpicture}}
-"""
+'''
     
     own_dic = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-    with open(os.path.join(own_dic,filename), "w") as f:
+    with open(os.path.join(own_dic,filename), 'w', encoding='utf-8') as f:
         f.write(tex)
 
-    print(f"-> {os.path.join(filename)} with ({len(x)} points)")
+    print(f'-> {os.path.join(filename)} with ({len(x)} points)')
     return
 
 def save_plot_tikz(model_results: dict,
                    algo_steps: list,
                    unlearned_keys:list,
                    title: str,
-                   xlabel: str = r"$x_0$",
-                   ylabel: str = r"$x_1$",
-                   filename: str = "scatter.txt",)->None:
+                   xlabel: str = r'$x_0$',
+                   ylabel: str = r'$x_1$',
+                   filename: str = 'scatter.txt',)->None:
     '''
     Takes data from a plot and saves them as a tikz-readable file
     '''
-    comp_list = {"admm dual":0,
-                 "admm base":1,
-                 "gd dpc dual":2,
-                 "gd dpc prim":3,
-                 "dadmm":0,
-                 "admm":1,
-                 "dpg":2,
-                 "pg":3,
+    comp_list = {'admm dual':0,
+                 'admm base':1,
+                 'gd dpc dual':2,
+                 'gd dpc prim':3,
+                 'dadmm':0,
+                 'admm':1,
+                 'dpg':2,
+                 'pg':3,
                  }
-    trained_on = {"admm dual":"mega dual last",
-                 "admm base":"mega last",
-                 "gd dpc dual":"mega dual last",
-                 "gd dpc prim":"mega last",
-                 "dadmm":"mega dual last",
-                 "admm":"mega last",
-                 "dpg":"mega dual last",
-                 "pg":"mega last",
+    trained_on = {'admm dual':'mega dual last',
+                 'admm base':'mega last',
+                 'gd dpc dual':'mega dual last',
+                 'gd dpc prim':'mega last',
+                 'dadmm':'mega dual last',
+                 'admm':'mega last',
+                 'dpg':'mega dual last',
+                 'pg':'mega last',
                  }
     thin = 0.5
     thick = 1.0
-    plots = ""
+    plots = ''
     colors_rgb = [
-    "firebrick",
-    "navy",
-    "darkgoldenrod",
-    "forestgreen",
-    "fuchsia",
-    "teal",
-    "darkorange",
-    "black",
-    "blue",
-    "red",
-    "green"
+    'firebrick',
+    'navy',
+    'darkgoldenrod',
+    'forestgreen',
+    'fuchsia',
+    'teal',
+    'darkorange',
+    'black',
+    'blue',
+    'red',
+    'green'
     ]
     markers = [
-        "*",
-        "diamond*",
-        "triangle*",
-        "square*",
-        "+",
-        "x",
-        "star",
-        "Mercedes star",
+        '*',
+        'diamond*',
+        'triangle*',
+        'square*',
+        '+',
+        'x',
+        'star',
+        'Mercedes star',
     ]
     unknown_index=0
     for model_name, model_result in model_results.items():
-        data = ""
+        data = ''
         for i, a_step in enumerate(algo_steps):
-            data += f"({a_step},{model_result[i]:.2f})"
+            data += f'({a_step},{model_result[i]:.2f})'
         if model_name in comp_list.keys():
             color_index = comp_list[model_name]
         else:
@@ -140,7 +140,7 @@ def save_plot_tikz(model_results: dict,
             linewidth = thin
         if model_name in unlearned_keys:
 
-            current_plot = f"""
+            current_plot = f'''
             \\addplot[color={colors_rgb[color_index]},
                 dashed,
                 mark options={{solid}},
@@ -151,9 +151,9 @@ def save_plot_tikz(model_results: dict,
                 {data}
                 }};
                 \\addlegendentry{{{model_name}}}
-            """
+            '''
         else:
-            current_plot = f"""
+            current_plot = f'''
             \\addplot[color={colors_rgb[color_index]},
                 mark = {markers[color_index]},
                 line width ={linewidth},
@@ -162,10 +162,10 @@ def save_plot_tikz(model_results: dict,
                 {data}
                 }};
                 \\addlegendentry{{{model_name}}}
-            """
+            '''
         plots+=current_plot
 
-    full_plot = f"""
+    full_plot = f'''
     \\begin{{tikzpicture}}
     \\begin{{axis}}[
         xlabel={{{xlabel}}},
@@ -176,9 +176,9 @@ def save_plot_tikz(model_results: dict,
     {plots}
     \\end{{axis}}
     \\end{{tikzpicture}}
-    """
+    '''
     own_dic = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-    with open(os.path.join(own_dic,"tikz",filename), "w") as f:
+    with open(os.path.join(own_dic,'tikz',filename), 'w', encoding='utf-8') as f:
         f.write(full_plot)
     return
 
@@ -186,23 +186,23 @@ def save_trajectory_tikz(xk2,x_s,u_preds):
     '''
     Produces a trajectoryplot in tikz for the closed loop simulations for one K
     '''
-    colrs = {"dpc":"dpc",
-             "0":"pgdc",
-             "1":"dpgdc",
-             "2":"admmc",
-             "3":"dadmmc"}
-    forbidden_key = "perfect"
-    name_keys = {"dpc":"",
-                "0":"",
-                 "1":"",
-                 "2":"",
-                 "3":""}
+    colrs = {'dpc':'dpc',
+             '0':'pgdc',
+             '1':'dpgdc',
+             '2':'admmc',
+             '3':'dadmmc'}
+    forbidden_key = 'perfect'
+    name_keys = {'dpc':'',
+                '0':'',
+                 '1':'',
+                 '2':'',
+                 '3':''}
     trajectory_plots = ''
     x0_trajectories = ''
     x1_trajectories = ''
     u0_trajectories = ''
     for k in name_keys.keys():
-        if k == "dpc":
+        if k == 'dpc':
             x0 = xk2[0,:]
             x1 = xk2[1,:]
             u = u_preds[k]
@@ -296,7 +296,7 @@ def save_trajectory_tikz(xk2,x_s,u_preds):
     \\end{{tikzpicture}}
     '''
     own_dic = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-    with open(os.path.join(own_dic,"tikz",f"trajectory_tikz{np.random.randint(100,10000)}.txt"), "w") as f:
+    with open(os.path.join(own_dic,'tikz',f'trajectory_tikz{np.random.randint(100,10000)}.txt'), 'w', encoding='utf-8') as f:
         f.write(full_plot)
     return
 
@@ -306,8 +306,8 @@ def triangle_finder(values: np.ndarray)->set:
     This function finds the triangles that are spanned between the points and hands it to the plot function
     '''
     x, y= values[0,:], values[1,:]
-    df = pd.DataFrame(values.T,columns=["x0","x1"])
-    df = df.sort_values(["x0","x1"]).reset_index(drop=True)
+    df = pd.DataFrame(values.T,columns=['x0','x1'])
+    df = df.sort_values(['x0','x1']).reset_index(drop=True)
     pts = list(range(0,x.shape[0]))
     # calculate edge length of the triangles
     min_x = 1000#

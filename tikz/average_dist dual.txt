@@ -1,0 +1,92 @@
+
+    \begin{tikzpicture}
+    \begin{axis}[
+        xlabel={algo steps},
+        ylabel={log dist to $(\cdot)^{{\ast}}$},
+        title={dist dual},
+        legend style={at={(1.02, 0.5)},anchor = west},
+    ]
+    
+            \addplot[color=firebrick,
+                mark = *,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,-0.03)(10,0.08)(15,-0.21)
+                };
+                \addlegendentry{admm dual}
+            
+            \addplot[color=navy,
+                mark = diamond*,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,2.03)(10,1.94)(15,2.45)
+                };
+                \addlegendentry{admm base}
+            
+            \addplot[color=darkgoldenrod,
+                mark = triangle*,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,-0.14)(10,0.46)(15,-0.01)
+                };
+                \addlegendentry{gd dpc dual}
+            
+            \addplot[color=forestgreen,
+                mark = square*,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,2.76)(10,2.71)(15,2.67)
+                };
+                \addlegendentry{gd dpc prim}
+            
+            \addplot[color=forestgreen,
+                dashed,
+                mark options={solid},
+                mark = square*,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,4.22)(10,4.09)(15,4.00)
+                };
+                \addlegendentry{pg}
+            
+            \addplot[color=darkgoldenrod,
+                dashed,
+                mark options={solid},
+                mark = triangle*,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,-0.04)(10,-0.06)(15,-0.07)
+                };
+                \addlegendentry{dpg}
+            
+            \addplot[color=navy,
+                dashed,
+                mark options={solid},
+                mark = diamond*,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,3.48)(10,3.50)(15,3.00)
+                };
+                \addlegendentry{admm}
+            
+            \addplot[color=firebrick,
+                dashed,
+                mark options={solid},
+                mark = *,
+                line width =0.5,
+                ] coordinates
+                {
+                (5,-0.07)(10,-0.10)(15,-0.13)
+                };
+                \addlegendentry{dadmm}
+            
+    \end{axis}
+    \end{tikzpicture}
+    

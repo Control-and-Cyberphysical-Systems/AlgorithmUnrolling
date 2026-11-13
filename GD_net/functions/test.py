@@ -1,5 +1,4 @@
 import torch
-import random
 import numpy as np
 from functions.helperfunctions import *
 import matplotlib.pyplot as plt
@@ -12,14 +11,14 @@ def test(self,printer:bool=False):
     trainable = True
     for p in self.model.parameters():
         p.requires_grad = False
-    if "dpc" == self.loss_fcn.name:
-        self.get_loss_function(run_dict={"loss function":"unsupervised dual last"})
-        print("hello")
+    if 'dpc' == self.loss_fcn.name:
+        self.get_loss_function(run_dict={'loss function':'unsupervised dual last'})
+        print('hello')
     optimizer = torch.optim.AdamW(self.model.parameters(),lr =0.001)
     optimizer.zero_grad()
     X = self.x_test
     Y = self.y_test
-    update_progress_bar(1,1000000,f"Start of testing | {self.save_name(self.model)}")
+    update_progress_bar(1,1000000,f'Start of testing | {self.save_name(self.model)}')
     to_print= int(np.ceil(X.shape[0]/1000))
     order = list(range(0,X.shape[0]))
     batch_size = 1
@@ -43,10 +42,10 @@ def test(self,printer:bool=False):
         # Calculate the backward graph and then make the optimizer step
         test_loss.append(float(loss_loc.detach().mean()))
         if (i_ind)%to_print == 0 and printer: 
-            update_progress_bar(i_ind,max_train_iters,"Testing")
+            update_progress_bar(i_ind,max_train_iters,'Testing')
     fig,axs = plt.subplots(1,3,figsize=(12,4))
     axs[0].plot(np.abs(self.train_loss))
-    axs[0].set_yscale("log")
+    axs[0].set_yscale('log')
     pos = self.improvement[1:] > 0
     neg = self.improvement[1:] < 0
     if len(self.improvement)>1 and np.any(self.improvement)>0:
@@ -56,9 +55,9 @@ def test(self,printer:bool=False):
         axs[1].axhline(0, color='k', linewidth=0.5)
         axs[1].legend()
     axs[2].plot(np.abs(test_loss))
-    axs[2].set_yscale("log")
+    axs[2].set_yscale('log')
     own_dic = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-    fig.savefig(os.path.join(own_dic,"testing_figures",f"{self.save_name(self.model)}_{self.n_p}.png"))
+    fig.savefig(os.path.join(own_dic,'testing_figures',f'{self.save_name(self.model)}_{self.n_p}.png'))
     plt.close(fig)
-    update_progress_bar(99,100,f"End of testing | {self.save_name(self.model)} |\n")
+    update_progress_bar(99,100,f'End of testing | {self.save_name(self.model)} |\n')
     return

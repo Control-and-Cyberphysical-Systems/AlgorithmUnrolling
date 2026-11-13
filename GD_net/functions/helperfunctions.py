@@ -49,7 +49,7 @@ def find_H(A:np.ndarray,B:np.ndarray,
         elif len(args) == 2:
             Mt, wt = args
         else:
-            raise ValueError("Unsupported number of inputs")
+            raise ValueError('Unsupported number of inputs')
 
         lx, n = Mx.shape
         lt = Mt.shape[0]
@@ -71,9 +71,9 @@ def find_H(A:np.ndarray,B:np.ndarray,
         return MMx,wwx,MMu,wwu
     
     def compute_terminal_set(A:np.ndarray,B:np.ndarray,K:np.ndarray,Mx:np.ndarray,wx:np.ndarray,Mu:np.ndarray,wu:np.ndarray):
-        """
+        '''
         Subfunction to determine the terminal constraints of the control law
-        """
+        '''
         ABK = A - B@K
         Ml = np.vstack((Mx,-Mu@K))
         wl = np.vstack((wx,wu))
@@ -91,7 +91,7 @@ def find_H(A:np.ndarray,B:np.ndarray,
                 c = matrix(-fT)
                 G = matrix(Mt)
                 h = matrix(wt)
-                solvers.options["show_progress"] = False
+                solvers.options['show_progress'] = False
                 res = solvers.lp(c,G,h)
                 xAst  = np.array(res['x']).flatten()
                 wMax  = fT @ xAst
@@ -221,61 +221,61 @@ def set_problem(T_s:float,N_pred:int,A:np.ndarray=None,B:np.ndarray=None)->dict[
                                                  lu=lu,
                                                  uu=uu)
     
-    prob_dict = {"A":A,
-                 "B":B,
-                 "lx":lx,
-                 "ux":ux,
-                 "lu":lu,
-                 "uu":uu,
-                 "Q":Q,
-                 "R":R,
-                 "H":H,
-                 "F":F,
-                 "c":c,
-                 "G":G,
-                 "E":E,
-                 "d":d,
-                 "AA":AA,
-                 "BB":BB,
-                 "GG":GG,
-                 "HH":HH,
-                 "QQ":QQ,
-                 "FF":FF,
-                 "Lz":Lz,
-                 "Uz":Uz,
-                 "Qx":Qb,
-                 "Ru":Rb,
+    prob_dict = {'A':A,
+                 'B':B,
+                 'lx':lx,
+                 'ux':ux,
+                 'lu':lu,
+                 'uu':uu,
+                 'Q':Q,
+                 'R':R,
+                 'H':H,
+                 'F':F,
+                 'c':c,
+                 'G':G,
+                 'E':E,
+                 'd':d,
+                 'AA':AA,
+                 'BB':BB,
+                 'GG':GG,
+                 'HH':HH,
+                 'QQ':QQ,
+                 'FF':FF,
+                 'Lz':Lz,
+                 'Uz':Uz,
+                 'Qx':Qb,
+                 'Ru':Rb,
                  }
     return prob_dict
 
 def json_array(arr:np.ndarray)->dict:
-    """
+    '''
     Json cannot work with np.arrays, it needs to be transformed 
     into a list, but needs to be recreatable\n
     INPUT: np.array \n
-    OUTPUT: dict[data,dtype,shape]"""
+    OUTPUT: dict[data,dtype,shape]'''
     if type(arr) is not np.ndarray:
         arr = np.array(arr)
     data = arr.tolist()
     shape = arr.shape
     dtype = str(arr.dtype)
-    return {"data":data,"shape":shape,"dtype":dtype}
+    return {'data':data,'shape':shape,'dtype':dtype}
 
 def array_json(arr_dict:dict)->np.ndarray:
-    """
+    '''
     Inverse transformation from json readable format to numpy array
     INPUT: encoded array
     OUTPUT: decoded array
-    """
-    arr_loaded = np.array(arr_dict["data"], dtype=arr_dict["dtype"])
-    arr_loaded = arr_loaded.reshape(arr_dict["shape"])
+    '''
+    arr_loaded = np.array(arr_dict['data'], dtype=arr_dict['dtype'])
+    arr_loaded = arr_loaded.reshape(arr_dict['shape'])
     return arr_loaded 
 
 def save_data(save_dict: dict | None = None):
-    """
+    '''
     Save the prepared Data to JSON. Converts numpy arrays in arbitrarily nested
     dicts/lists/tuples using json_array().
-    """
+    '''
     if save_dict is None:
         save_dict = {}
 
@@ -292,40 +292,40 @@ def save_data(save_dict: dict | None = None):
     to_save_dict = convert(save_dict)
 
     # Dateiname bestimmen
-    name = save_dict.get("Name", "data")
-    if not name.endswith(".json"):
-        name = f"{name}.json"
+    name = save_dict.get('Name', 'data')
+    if not name.endswith('.json'):
+        name = f'{name}.json'
 
     # Zielpfad
     cd = os.path.abspath(__file__)
     cd2 = os.path.dirname(cd)
     cd3 = os.path.dirname(cd2)
     pd = os.path.dirname(cd3)
-    filepath = os.path.join(pd, "data", name)
+    filepath = os.path.join(pd, 'data', name)
 
-    with open(filepath, "w") as f:
+    with open(filepath, 'w') as f:
         json.dump(to_save_dict, f)
 
     return True, name
 
 def read_data(name: str):
-    """
+    '''
     Read saved JSON data and convert stored numpy arrays back.
-    """
+    '''
 
-    if not name.endswith(".json"):
-        name = f"{name}.json"
+    if not name.endswith('.json'):
+        name = f'{name}.json'
 
     cd = os.path.abspath(__file__)
     pd = os.path.dirname(os.path.dirname(os.path.dirname(cd)))
-    filepath = os.path.join(pd, "data", name)
+    filepath = os.path.join(pd, 'data', name)
 
     with open(filepath) as f:
         savefile = json.load(f)
 
     def convert(item):
         # numpy-array representation
-        if isinstance(item, dict) and "dtype" in item:
+        if isinstance(item, dict) and 'dtype' in item:
             return array_json(item)
 
         # nested dict
@@ -356,7 +356,7 @@ def diff(x,dt):
         df = 0
     return df
 
-def update_progress_bar(i:int=0,maxiter:int=100,process:str="..."):
+def update_progress_bar(i:int=0,maxiter:int=100,process:str='...'):
     '''
     Produces and updates a progress bar
     
@@ -440,10 +440,10 @@ class PG():
                 P = matrix(self.G[active_cons,:]@self.G[active_cons,:].T)
                 q = matrix(self.G[active_cons,:]@(self.H@z_kp1 + self.F@x[0,:]))
                 solu = solvers.qp(P,q,G=matrix(-np.eye(n_active)),h=matrix(np.zeros((n_active, 1))))
-                lam_act= np.array(solu["x"]).reshape((n_active,))
+                lam_act= np.array(solu['x']).reshape((n_active,))
                 lam_k[active_cons] = np.maximum(lam_act,0.0)
             # else:
-            #     print(f"stprü{i}")
+            #     print(f'stprü{i}')
             lam[0, :, i+1] = lam_k
 
             # update variable
@@ -500,7 +500,7 @@ class BADMM():
                 P = matrix(self.G[active_cons,:]@self.G[active_cons,:].T)
                 q = matrix(self.G[active_cons,:]@(self.H@z[0,:,i+1] + self.F@x[0,:]))
                 solu = solvers.qp(P,q,G=matrix(-np.eye(n_active)),h=matrix(np.zeros((n_active, 1))))
-                lam_act= np.array(solu["x"]).reshape((n_active,))
+                lam_act= np.array(solu['x']).reshape((n_active,))
                 lam_k[active_cons] = np.maximum(lam_act,0.0)
             lam[0, :, i+1] = lam_k
         return z,y,lam

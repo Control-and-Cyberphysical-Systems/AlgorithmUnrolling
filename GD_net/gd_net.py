@@ -9,94 +9,94 @@ from functions import train,test,evaluate_dpc
 class GD_net():
     def __init__(self,run_dict:dict):
         # Set the values for the problem
-        self.N = run_dict["N"]
+        self.N = run_dict['N']
         self.T_s = 1
-        self.pre_training_or_not = run_dict["pre training"]
-        self.learning_rate = run_dict["learning rate"]
+        self.pre_training_or_not = run_dict['pre training']
+        self.learning_rate = run_dict['learning rate']
         self.rho = 0.1
         solvers.options['show_progress'] = False
         # If we do DPC as a cost function read the appropriate parameters
-        if "dpc" in run_dict["loss function"].lower():
+        if 'dpc' in run_dict['loss function'].lower():
             own_dic = os.path.dirname(os.path.realpath(__file__))
-            dpc_dict = loadmat(os.path.join(own_dic,f"mat_files_{self.N}","QP_parameters_SS.mat"))
+            dpc_dict = loadmat(os.path.join(own_dic,f'mat_files_{self.N}','QP_parameters_SS.mat'))
             self.dpc_dict = dpc_dict
-            npm = int(np.round(self.dpc_dict["G"].shape[0]/(2*self.N)))
-            self.n = self.dpc_dict["E"].shape[1]
+            npm = int(np.round(self.dpc_dict['G'].shape[0]/(2*self.N)))
+            self.n = self.dpc_dict['E'].shape[1]
             self.m = npm-self.n
-            # self.n = self.dpc_dict["B_LS"].shape[0]
-            # self.m = self.dpc_dict["B_LS"].shape[1]
-            ols_read = dpc_dict["Kx"]
+            # self.n = self.dpc_dict['B_LS'].shape[0]
+            # self.m = self.dpc_dict['B_LS'].shape[1]
+            ols_read = dpc_dict['Kx']
             ols_enhanced = np.vstack((np.eye(self.n),ols_read))
-            tls_read = dpc_dict["Ku"]
+            tls_read = dpc_dict['Ku']
             tls_enhanced = np.vstack((np.zeros((self.n,self.N*self.m)),tls_read))
             prob_dict = set_problem(T_s=self.T_s,N_pred=self.N)
-            prob_dict["AA"] = ols_enhanced
-            prob_dict["BB"] = tls_enhanced
-            prob_dict["F"] = np.asarray(self.dpc_dict["F"],dtype=np.float64)
-            prob_dict["G"] = np.asarray(self.dpc_dict["G"],dtype=np.float64)
-            prob_dict["H"] = np.asarray(self.dpc_dict["H"],dtype=np.float64)
-            prob_dict["E"] = np.asarray(self.dpc_dict["E"],dtype=np.float64)
-            prob_dict["d"] = np.asarray(self.dpc_dict["d"],dtype=np.float64)
+            prob_dict['AA'] = ols_enhanced
+            prob_dict['BB'] = tls_enhanced
+            prob_dict['F'] = np.asarray(self.dpc_dict['F'],dtype=np.float64)
+            prob_dict['G'] = np.asarray(self.dpc_dict['G'],dtype=np.float64)
+            prob_dict['H'] = np.asarray(self.dpc_dict['H'],dtype=np.float64)
+            prob_dict['E'] = np.asarray(self.dpc_dict['E'],dtype=np.float64)
+            prob_dict['d'] = np.asarray(self.dpc_dict['d'],dtype=np.float64)
         else:
             prob_dict = set_problem(T_s=self.T_s,N_pred=self.N)
         # Set all parameters
-        self.A = prob_dict["A"]
-        self.B = prob_dict["B"]
+        self.A = prob_dict['A']
+        self.B = prob_dict['B']
         self.n = self.B.shape[0]
         self.m = self.B.shape[1]
         self.p = self.N*(self.n+self.m)
-        self.Q = prob_dict["Q"]
-        self.R = prob_dict["R"]
-        self.lx =prob_dict["lx"]
-        self.ux =prob_dict["ux"]
-        self.lu =prob_dict["lu"]
-        self.uu =prob_dict["uu"]
-        self.H = prob_dict["H"]
-        self.F = prob_dict["F"]
-        self.c = prob_dict["c"]
-        self.G = prob_dict["G"]
-        self.E = prob_dict["E"]
-        self.d = prob_dict["d"]
-        self.GG =prob_dict["GG"]
-        self.HH =prob_dict["HH"]
-        self.QQ =prob_dict["QQ"]
-        self.FF =prob_dict["FF"]
-        self.Lz =prob_dict["Lz"]
-        self.Uz =prob_dict["Uz"]
-        self.AA =prob_dict["AA"]
-        self.BB =prob_dict["BB"]
+        self.Q = prob_dict['Q']
+        self.R = prob_dict['R']
+        self.lx =prob_dict['lx']
+        self.ux =prob_dict['ux']
+        self.lu =prob_dict['lu']
+        self.uu =prob_dict['uu']
+        self.H = prob_dict['H']
+        self.F = prob_dict['F']
+        self.c = prob_dict['c']
+        self.G = prob_dict['G']
+        self.E = prob_dict['E']
+        self.d = prob_dict['d']
+        self.GG =prob_dict['GG']
+        self.HH =prob_dict['HH']
+        self.QQ =prob_dict['QQ']
+        self.FF =prob_dict['FF']
+        self.Lz =prob_dict['Lz']
+        self.Uz =prob_dict['Uz']
+        self.AA =prob_dict['AA']
+        self.BB =prob_dict['BB']
         self.GHG= self.G@np.linalg.inv(self.H)@self.G.T
         self.EGHF=self.E+self.G@np.linalg.inv(self.H)@self.F
         self.a_opt = 1/np.max(np.linalg.eigh(self.GHG).eigenvalues)
-        prob_dict["N"] = self.N
-        prob_dict["m"] = self.m
-        prob_dict["n"] = self.n
-        self.opt_steps = run_dict["number of model parameters"]
+        prob_dict['N'] = self.N
+        prob_dict['m'] = self.m
+        prob_dict['n'] = self.n
+        self.opt_steps = run_dict['number of model parameters']
         z_to_u = np.zeros((self.m*self.N,self.N*(self.n+self.m)))
         for i in range(0,self.N):
             for j in range(0,self.m):
                 z_to_u[i*self.m+j,i*(self.m+self.n)+j] = 1
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.dtypus = torch.float64
         self.z_to_u = z_to_u
         self.data_dict = prob_dict
-        prob_dict["dtype"] = self.dtypus
+        prob_dict['dtype'] = self.dtypus
         self.get_loss_function(run_dict=run_dict)
         self.create_data_set(run_dict=run_dict)
         # Set the trainable model
-        self.model = models.NET_CLASS(name=run_dict["model"],
+        self.model = models.NET_CLASS(name=run_dict['model'],
                                       input_dim=self.n,
                                       output_dim=self.p,
                                       problem_parameters=prob_dict,
-                                      num_pars=run_dict["number of model parameters"])
-        if run_dict["batch size"] == 0:
+                                      num_pars=run_dict['number of model parameters'])
+        if run_dict['batch size'] == 0:
             self.batch_size = self.x_train.shape[0]
         else:
-            self.batch_size = run_dict["batch size"]
-        self.repititions = run_dict["repetitions"]
+            self.batch_size = run_dict['batch size']
+        self.repititions = run_dict['repetitions']
         self.model.to(self.device)
-        print(f"Using device: {self.device}")
+        print(f'Using device: {self.device}')
         self.train_loss = []
         self.improvement = []
         # Get some external functions
@@ -109,7 +109,7 @@ class GD_net():
         '''
         Defines the name under which the trained model parameters are saved
         '''
-        return f"{model.name}_{self.N}_{model.num_pars}"
+        return f'{model.name}_{self.N}_{model.num_pars}'
     
     def save_model(self,model:models.NET_CLASS)->bool:
         '''
@@ -118,24 +118,24 @@ class GD_net():
         savename = self.save_name(model)
         
         own_dic = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        torch.save(model.state_dict(),os.path.join(own_dic,"model_parameters",f"{savename}.pt"))
+        torch.save(model.state_dict(),os.path.join(own_dic,'model_parameters',f'{savename}.pt'))
         return True
 
     def load_model(self,model:models.NET_CLASS)->models.NET_CLASS:
-        """
+        '''
         If there is a saved model, this method will load the model parameter
-        """
+        '''
         savename = self.save_name(model)
         own_dic = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        if os.path.isfile(os.path.join(own_dic,"model_parameters",f"{savename}.pt")):
-            model.load_state_dict(torch.load(os.path.join(own_dic,"model_parameters",f"{savename}.pt")))
-            print(f"Loaded Model: {savename}")
+        if os.path.isfile(os.path.join(own_dic,'model_parameters',f'{savename}.pt')):
+            model.load_state_dict(torch.load(os.path.join(own_dic,'model_parameters',f'{savename}.pt')))
+            print(f'Loaded Model: {savename}')
         else:
-            print(f"Nothing to load under {savename}.pt ...")
+            print(f'Nothing to load under {savename}.pt ...')
         return model
 
     def compare(self, xy: np.ndarray):
-        """
+        '''
         Parameters
         ----------
         xy : np.ndarray
@@ -158,10 +158,10 @@ class GD_net():
         lam : np.ndarray
             Dualvariablen mit Form
             (B, n_constraints, opt_steps + 1).
-        """
+        '''
 
         def condensed_to_uncondensed(self,x0: np.ndarray,U: np.ndarray):
-            """
+            '''
             Parameters
             ----------
             x0 : np.ndarray
@@ -180,7 +180,7 @@ class GD_net():
 
             U_traj : np.ndarray
                 Form (B, N, m, T)
-            """
+            '''
 
             AA = np.asarray(self.AA, dtype=x0.dtype)
             BB = np.asarray(self.BB, dtype=x0.dtype)
@@ -196,7 +196,7 @@ class GD_net():
             # U:  ( B, N*m, T )
             # ->  ( B, (N+1)*n, T )
             X = X0_part[..., np.newaxis] + np.einsum(
-                "ij,bjt->bit",
+                'ij,bjt->bit',
                 BB,
                 U
             )
@@ -253,7 +253,7 @@ class GD_net():
             # GHG:          (n_constraints, n_constraints)
             # ->            (B, n_constraints)
             gradient = np.einsum(
-                "ij,bj->bi",
+                'ij,bj->bi',
                 GHG,
                 lam[:, :, i]
             ) + EFGHx+self.d.T
@@ -271,7 +271,7 @@ class GD_net():
         # lam: (B, n_constraints, T)
         # ->   (B, N*m, T)
         Glam = np.einsum(
-            "ip,bpt->bit",
+            'ip,bpt->bit',
             G.T,
             lam
         )
@@ -298,17 +298,17 @@ class GD_net():
         '''
         Decides on which loss function to use while training, testing and evaluating
         '''
-        if run_dict["loss function"] == "dpc mega dual":
+        if run_dict['loss function'] == 'dpc mega dual':
             self.loss_fcn = DPCmegaDUAL(n=self.n,m=self.m,N=self.N)
-        elif run_dict["loss function"] == "dpc mega dual last":
+        elif run_dict['loss function'] == 'dpc mega dual last':
             self.loss_fcn = DPCmegaDUALLast(n=self.n,m=self.m,N=self.N)
-        elif run_dict["loss function"] == "dpc mega":
+        elif run_dict['loss function'] == 'dpc mega':
             self.loss_fcn = DPCmega(n=self.n,m=self.m,N=self.N)
-        elif run_dict["loss function"] == "dpc mega last":
+        elif run_dict['loss function'] == 'dpc mega last':
             self.loss_fcn = DPCmegaLast(n=self.n,m=self.m,N=self.N)
-        elif run_dict["loss function"] == "dpc mega first last":
+        elif run_dict['loss function'] == 'dpc mega first last':
             self.loss_fcn = DPCmegaLast(n=self.n,m=self.m,N=self.N)
-        elif run_dict["loss function"] == "dpc mega hat":
+        elif run_dict['loss function'] == 'dpc mega hat':
             self.loss_fcn = DPCmegaHat(n=self.n,m=self.m,N=self.N)
                 
         return
@@ -317,15 +317,15 @@ class GD_net():
         '''
         Create the data set that is used for training, testing and evaluation
         '''
-        self.n_p= run_dict["n_p"]
-        data_set_name = f"gd_set_{self.n_p}_{self.N}.json"
+        self.n_p= run_dict['n_p']
+        data_set_name = f'gd_set_{self.n_p}_{self.N}.json'
         cd = os.path.abspath(__file__)
         cd2 = os.path.dirname(cd)
         pd = os.path.dirname(cd2)
-        filepath = os.path.join(pd, "data", data_set_name)
+        filepath = os.path.join(pd, 'data', data_set_name)
         # Produce data
         if not os.path.isfile(filepath):
-            print(f"no file under:{data_set_name}")
+            print(f'no file under:{data_set_name}')
             P = matrix(self.G@np.linalg.inv(self.H)@self.G.T)
             G = matrix(-np.eye(self.G.shape[0]))
             h = matrix(np.zeros(self.G.shape[0]))
@@ -337,30 +337,30 @@ class GD_net():
             Y = []
             # Z: Just the optimal input (for closed loop)
             Z = []
-            print(f"Creating Data Set: {self.n_p}x{self.n_p} N: {self.N}")
+            print(f'Creating Data Set: {self.n_p}x{self.n_p} N: {self.N}')
             for i in range(0,self.n_p):
                 for j in range(0,self.n_p):
                     x = np.array([X1[i],X2[j]])
                     q = matrix((self.G@np.linalg.inv(self.H)@self.F+self.E)@x+self.d.reshape(self.d.shape[0]))
                     sol = solvers.qp(P=P,q=q,G=G,h=h)
-                    if sol["primal infeasibility"]**2 +sol["dual infeasibility"]**2 < 10**(-14):
-                        z_opt = np.array(sol["x"])
+                    if sol['primal infeasibility']**2 +sol['dual infeasibility']**2 < 10**(-14):
+                        z_opt = np.array(sol['x'])
                         X.append(x)
                         Y.append(z_opt)
                         Z.append(z_opt[:,0])
-                        update_progress_bar(i*self.n_p+j+1,self.n_p**2,"")
-            data_set = {"Name":data_set_name,
-                        "X":X,
-                        "Y":Y,
-                        "Z":Z}
+                        update_progress_bar(i*self.n_p+j+1,self.n_p**2,'')
+            data_set = {'Name':data_set_name,
+                        'X':X,
+                        'Y':Y,
+                        'Z':Z}
             save_data(save_dict=data_set)
         else:
-            print(f"Loading data set: {data_set_name}")
+            print(f'Loading data set: {data_set_name}')
             data_set = read_data(name=filepath)
 
         # Create test and train split
 
-        num_points = len(data_set["X"])
+        num_points = len(data_set['X'])
         test_train_split = 0.8
         train_points = int(np.round(num_points*test_train_split))
         order = list(range(0,num_points))
@@ -371,9 +371,9 @@ class GD_net():
         y_full = []
         z_full = []
         for i in order:
-            x_full.append(data_set["X"][i])
-            y_full.append(data_set["Y"][i])
-            z_full.append(data_set["Z"][i])
+            x_full.append(data_set['X'][i])
+            y_full.append(data_set['Y'][i])
+            z_full.append(data_set['Z'][i])
         # save the data appropriately
         self.x_train = torch.tensor(np.array(x_full[0:train_points]),dtype=self.dtypus)
         self.y_train = torch.tensor(np.array(y_full[0:train_points]),dtype=self.dtypus)

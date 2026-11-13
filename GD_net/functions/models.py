@@ -7,7 +7,7 @@ class NET_CLASS(nn.Module):
     '''
     Base MLP class. Produces the trainable net and decides about the structure depending on the input
     '''
-    def __init__(self,name:str="linear",input_dim:int=2,output_dim:int=100,problem_parameters:dict={},num_pars:int=100):
+    def __init__(self,name:str='linear',input_dim:int=2,output_dim:int=100,problem_parameters:dict={},num_pars:int=100):
         super().__init__()
         self.name = name
         if num_pars is None:
@@ -20,28 +20,28 @@ class NET_CLASS(nn.Module):
         self.input_dim = input_dim
         self.output_dim= output_dim
         match self.name:
-            case "gd dpc dual":
+            case 'gd dpc dual':
                 self.net = GDDUAL(mat_dim=output_dim,
                                     input_dim=input_dim,
                                     num_steps=num_pars,
                                     problem_parameters=problem_parameters)
-            case "gd dpc prim":
+            case 'gd dpc prim':
                 self.net = GDPRIM(mat_dim=output_dim,
                                     input_dim=input_dim,
                                     num_steps=num_pars,
                                     problem_parameters=problem_parameters)
-            case "admm base":
+            case 'admm base':
                 self.net = ADMMBase(mat_dim=output_dim,
                                     input_dim=input_dim,
                                     num_steps=num_pars,
                                     problem_parameters=problem_parameters)
-            case "admm dual":
+            case 'admm dual':
                 self.net = ADMMDual(mat_dim=output_dim,
                                     input_dim=input_dim,
                                     num_steps=num_pars,
                                     problem_parameters=problem_parameters)
             case _ :
-                print("No valid model selected")
+                print('No valid model selected')
                 
     def __str__(self):
         return self.name
