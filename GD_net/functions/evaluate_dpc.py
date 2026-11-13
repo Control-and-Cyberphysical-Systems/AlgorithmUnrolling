@@ -140,31 +140,36 @@ def evaluate_dpc(self,others:list,tikz:bool=False,printer:bool=False):
         dual_admm = local_dadmm(X_batch.detach().cpu().numpy())
         # learned models
         for m,model in enumerate(models):
-            values['perfect'][i,m] = float(model.loss_fcn(z=opt_prim,
+            perfect_value = float(model.loss_fcn(z=opt_prim,
                                             z_hat=opt_prim,
                                             mu=opt_dual,
                                             z_opt=opt_y_torch.unsqueeze(-1),
                                             x=X_batch).detach().cpu())
-            values['dpg'][f'{m},{model.loss_fcn.name}'][i] = float(model.loss_fcn(z=torch.tensor(normal_gd[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
+            values['perfect'][i,m] = perfect_value
+            dpg_value = float(model.loss_fcn(z=torch.tensor(normal_gd[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_hat=torch.tensor(normal_gd[1]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     mu=torch.tensor(normal_gd[2][:,0:predictions['0'][2].shape[1]]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_opt=opt_y_torch.unsqueeze(-1),
                                                                     x=X_batch).detach().cpu())
-            values['pg'][f'{m},{model.loss_fcn.name}'][i] = float(model.loss_fcn(z=torch.tensor(primal_gd[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
+            pg_value = float(model.loss_fcn(z=torch.tensor(primal_gd[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_hat=torch.tensor(primal_gd[1]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     mu=torch.tensor(primal_gd[2][:,0:predictions['0'][2].shape[1]]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_opt=opt_y_torch.unsqueeze(-1),
                                                                     x=X_batch).detach().cpu())
-            values['admm'][f'{m},{model.loss_fcn.name}'][i] = float(model.loss_fcn(z=torch.tensor(prim_admm[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
+            admm_value = float(model.loss_fcn(z=torch.tensor(prim_admm[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_hat=torch.tensor(prim_admm[1]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     mu=torch.tensor(prim_admm[2][:,0:predictions['0'][2].shape[1]]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_opt=opt_y_torch.unsqueeze(-1),
                                                                     x=X_batch).detach().cpu())
-            values['dadmm'][f'{m},{model.loss_fcn.name}'][i] = float(model.loss_fcn(z=torch.tensor(dual_admm[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
+            dadmm_value = float(model.loss_fcn(z=torch.tensor(dual_admm[0]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_hat=torch.tensor(dual_admm[1]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     mu=torch.tensor(dual_admm[2][:,0:predictions['0'][2].shape[1]]).to(device = devices[f'{m}'],dtype = dtypes[f'{m}']),
                                                                     z_opt=opt_y_torch.unsqueeze(-1),
                                                                     x=X_batch).detach().cpu())
+            values['dpg'][f'{m},{model.loss_fcn.name}'][i]   = np.log10(np.abs(dpg_value-perfect_value)   / np.abs(perfect_value+10**(-5)))
+            values['pg'][f'{m},{model.loss_fcn.name}'][i]    = np.log10(np.abs(pg_value-perfect_value)    / np.abs(perfect_value+10**(-5)))
+            values['dadmm'][f'{m},{model.loss_fcn.name}'][i] = np.log10(np.abs(dadmm_value-perfect_value) / np.abs(perfect_value+10**(-5)))
+            values['admm'][f'{m},{model.loss_fcn.name}'][i]  = np.log10(np.abs(admm_value-perfect_value)  / np.abs(perfect_value+10**(-5)))
             if  norm_dual > dual_tol:
                 values[f'{m}']['dist dual'][i] = np.min([(np.linalg.norm(np.array(predictions[f'{m}'][2][:,:,-1].detach().cpu())-np.array(opt_y).T)/np.linalg.norm(opt_y)),1000])
                 values['dpg']['dist dual'][i] = np.linalg.norm(normal_gd[2][0,:,-1]-np.array(opt_y).T)/np.linalg.norm(opt_y)
@@ -178,11 +183,12 @@ def evaluate_dpc(self,others:list,tikz:bool=False,printer:bool=False):
                 values['admm']['dist prim'][i] = np.linalg.norm(prim_admm[0][0,:,-1]-np.array(opt_y_prim).T)/np.linalg.norm(opt_y_prim)
                 values['dadmm']['dist prim'][i] = np.linalg.norm(dual_admm[0][0,:,-1]-np.array(opt_y_prim).T)/np.linalg.norm(opt_y_prim)
             for n,nodel in enumerate(models):
-                values[f'{m}'][f'{n},{nodel.loss_fcn.name}'][i] =float(nodel.loss_fcn(z=predictions[f'{m}'][0],
-                                                                                z_hat=predictions[f'{m}'][1],
-                                                                                mu=predictions[f'{m}'][2],
-                                                                                z_opt=opt_y_torch.unsqueeze(-1),
-                                                                                x=X_batch).detach().cpu())
+                learned_value = float(nodel.loss_fcn(z=predictions[f'{m}'][0],
+                                                    z_hat=predictions[f'{m}'][1],
+                                                    mu=predictions[f'{m}'][2],
+                                                    z_opt=opt_y_torch.unsqueeze(-1),
+                                                    x=X_batch).detach().cpu())
+                values[f'{m}'][f'{n},{nodel.loss_fcn.name}'][i] = np.log10(np.abs(learned_value -perfect_value)/np.abs(perfect_value+10**(-5)))
         if (i)%to_print == 0 and printer:
             update_progress_bar(i,X.shape[0]*3,f'Eval: {eval_name} -> Parameter space evaluation')
     update_progress_bar(X.shape[0]-1,X.shape[0]*3,f'Eval: {eval_name}-> Parameter space evaluation\n')
