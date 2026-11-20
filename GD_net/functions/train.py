@@ -5,7 +5,7 @@ from functions.helperfunctions import *
 def train(self,printer:bool=False):
     self.model = self.load_model(self.model)
     # Helps debugging by finding the exact line, where the error occurs
-    torch.autograd.set_detect_anomaly(True)
+    # torch.autograd.set_detect_anomaly(True)
     self.model.train()
     X = self.x_train
     Y = self.y_train
